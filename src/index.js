@@ -1,52 +1,29 @@
 const express = require("express");
-const dotenv = require("dotenv");
-const { PrismaClient } = require("@prisma/client");
-dotenv.config();
+const cors = require("cors");
 
-const prisma = new PrismaClient();
+const criteriaRoutes = require("./routes/criteriaRoutes");
+const alternatives = require("./routes/alternatives");
+const calculate = require("./routes/calculate");
+const scores = require("./routes/scores");
+
+require("dotenv").config();
+
 const app = express();
+const PORT = process.env.PORT || 2000;
 
-const PORT = process.env.PORT;
-
+app.use(cors());
 app.use(express.json());
 
-app.get("/api", (req, res) => {
-  res.send("Hello Kamu");
-});
+app.use("/criteria", criteriaRoutes);
+app.use("/alternatives", alternatives);
+app.use("/calculate", calculate);
+app.use("/scores", scores);
 
-app.get("/products", async (req, res) => {
-  const product = await prisma.product.findMany();
-  res.send(product);
-});
-
-app.post("/products", async (req, res) => {
-  const newProductData = req.body;
-
-  const products = await prisma.product.create({
-    data: {
-      name: newProductData.name,
-      description: newProductData.description,
-      price: newProductData.price,
-      image: newProductData.image,
-    },
-  });
-  res.send({
-    data: products,
-    message: "create products success",
-  });
-});
-
-app.delete("/products/:id", async (req, res) => {
-  const productId = req.params.id;
-  await prisma.product.delete({
-    where: {
-      id: parseInt(productId),
-    },
-  });
-
-  res.send("product deleted");
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Something went wrong!" });
 });
 
 app.listen(PORT, () => {
-  console.log("Express API running: " + PORT);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
