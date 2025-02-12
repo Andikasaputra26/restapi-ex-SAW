@@ -12,7 +12,7 @@ router.post("/scores", async (req, res) => {
     });
     res.json(score);
   } catch (error) {
-    // res.status(500).json({ error: "Failed to create score" });
+    res.status(500).json({ error: "Failed to create score" });
   }
 });
 
